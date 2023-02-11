@@ -1,0 +1,15 @@
+﻿@using FinanceMyLife.Data.Services;
+@typeparam DTO
+
+<SfGrid Query="GridQuery" @ref="GridRef" TValue="DTO" Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel" })" AllowPaging="true">
+    <SfDataManager AdaptorInstance="typeof(CustomDataAdaptor<DTO>)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
+    <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog"></GridEditSettings>
+    <GridColumns>
+        <GridColumn Field=@PKName IsPrimaryKey="true" Visible="@PKVisible" Width="50"></GridColumn>
+        @GridColumnsTemplate
+    </GridColumns>
+</SfGrid>
+
+@code {
+
+}

@@ -1,4 +1,5 @@
 ﻿using Syncfusion.Blazor;
+using Syncfusion.Blazor.Data;
 using System.Linq.Expressions;
 
 namespace FinanceMyLife.Extensions;
@@ -43,6 +44,27 @@ public static class LinqExtensions
         }
 
         return query;
+    }
+
+    public static async Task<System.Collections.IEnumerable> GroupBy<Transaction>(this System.Collections.IEnumerable result, DataManagerRequest dm)
+    {
+        if (dm.Group != null)
+        {
+            foreach (var group in dm.Group)
+            {
+                result = DataUtil.Group<Transaction>(result, group, dm.Aggregates, 0, dm.GroupByFormatter);
+            }
+        }
+        return result;
+
+
+        //if (dm.Group != null && dm.Group.Any())
+        //{
+        //    var test = result;
+        //    var res = DataOperations.PerformGrouping<T>(test, dm.Group);
+
+        //}
+        //return result;
     }
 
 }

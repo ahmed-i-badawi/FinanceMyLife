@@ -1,9 +1,16 @@
 ﻿@using FinanceMyLife.Data.Services;
 @typeparam DTO
 
-<SfGrid Query="GridQuery" @ref="GridRef" TValue="DTO" Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel" })" AllowPaging="true">
+<SfGrid Query="GridQuery" @ref="GridRef" TValue="DTO" Toolbar="@(ToolbarList)" ShowColumnChooser="true"
+        AllowPaging="true" AllowGrouping=true AllowMultiSorting=true AllowReordering=true AllowSorting=true AllowFiltering=true>
+    <GridPageSettings PageSize="10" PageCount="5" PageSizes="@(new int[]{ 10, 20, 50, 100, 1000 })"></GridPageSettings>
+    <GridEvents OnToolbarClick="ToolbarClick" TValue="DTO"></GridEvents>
     <SfDataManager AdaptorInstance="typeof(CustomDataAdaptor<DTO>)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
     <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog"></GridEditSettings>
+    @if (GridAggregatesTemplate != null)
+    {
+        @GridAggregatesTemplate
+    }
     <GridColumns>
         <GridColumn Field=@PKName IsPrimaryKey="true" Visible="@PKVisible" Width="50"></GridColumn>
         @GridColumnsTemplate
@@ -12,4 +19,15 @@
 
 @code {
 
+    [Parameter]
+    public System.Action AddBatch { get; set; }
+
+    public async Task ToolbarClick(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+    {
+        if (args.Item.Text == "Add" && AddBatch != null)
+        {
+            args.Cancel = true;
+            AddBatch.Invoke();
+        }
+    }
 }

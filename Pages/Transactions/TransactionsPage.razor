@@ -1,0 +1,121 @@
+﻿@page "/Transactions"
+<h3>Transactions</h3>
+
+
+
+<CRUDGridComponent GridQuery="GridQuery" DTO="Transaction" PKName="Id" AddBatch="OpenDialog">
+    <GridAggregatesTemplate>
+        <GridAggregates>
+            <GridAggregate>s
+                <GridAggregateColumns>
+                    <GridAggregateColumn Field=@nameof(Transaction.Amount) Type="AggregateType.Sum" Format="C2">
+                        <FooterTemplate>
+                            @{
+                                var aggregate = (context as AggregateTemplateContext);
+                                <div>
+                                    <p>Sum: @aggregate.Sum</p>
+                                </div>
+                            }
+                        </FooterTemplate>
+                    </GridAggregateColumn>
+                </GridAggregateColumns>
+            </GridAggregate>
+        </GridAggregates>
+    </GridAggregatesTemplate>
+    <GridColumnsTemplate>
+        <GridColumn Field="@nameof(Transaction.Description)" HeaderText="Description" Width="100"></GridColumn>
+        <GridColumn Field="@nameof(Transaction.Amount)" HeaderText="Amount" Width="100"></GridColumn>
+        <GridColumn HeaderText="Category" Width="100"
+                    AllowEditing="false" AllowFiltering="false" AllowGrouping="false" AllowReordering="false" AllowSorting="false">
+            <Template>
+                @{
+                    var c = context as Transaction;
+                    <span>@c.Category?.Name</span>
+                }
+            </Template>
+            <EditTemplate>
+                @{
+                    var c = context as Transaction;
+
+                    <SfDropDownList AllowFiltering=true Query="DropDownCategoryQuery" TValue="int?" TItem="Category" @bind-Value="c.CategoryId" Width="300px">
+                        <SfDataManager AdaptorInstance="typeof(CustomDataAdaptor<Category>)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
+                        <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                }
+            </EditTemplate>
+        </GridColumn>
+        <GridColumn HeaderText="Member" Width="100"
+                    AllowEditing="false" AllowFiltering="false" AllowGrouping="false" AllowReordering="false" AllowSorting="false">
+            <Template>
+                @{
+                    var c = context as Transaction;
+                    <span>@c.Member?.Name</span>
+                }
+            </Template>
+            <EditTemplate>
+                @{
+                    var c = context as Transaction;
+
+                    <SfDropDownList AllowFiltering=true Query="DropDownMemberQuery" TValue="int?" TItem="Member" @bind-Value="c.MemberId" Width="300px">
+                        <SfDataManager AdaptorInstance="typeof(CustomDataAdaptor<Member>)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
+                        <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                }
+            </EditTemplate>
+        </GridColumn>
+        <GridColumn Field="@nameof(Transaction.Date)" HeaderText="Date" Width="100"></GridColumn>
+        <GridColumn Field="@nameof(Transaction.Number)" HeaderText="Number" Width="100"></GridColumn>
+        <GridColumn HeaderText="Type" Width="100"
+                    AllowEditing="false" AllowFiltering="false" AllowGrouping="false" AllowReordering="false" AllowSorting="false">
+            <Template>
+                @{
+                    var c = context as Transaction;
+                    <span>@(c.Category?.Type.ToString() ?? "")</span>
+                }
+            </Template>
+        </GridColumn>
+    </GridColumnsTemplate>
+</CRUDGridComponent>
+
+<SfDialog @bind-Visible="isDialogOpen" Width="50%" IsModal="true">
+    <DialogTemplates>
+        <Header>
+            <h1>Add Batch Transactions</h1>
+        </Header>
+        <Content>
+            <AddBatchComponent Close="CloseDialog"></AddBatchComponent>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+
+@code {
+    public Query GridQuery { get; set; } = new Query();
+    public Query DropDownMemberQuery { get; set; } = new Query();
+    public Query DropDownCategoryQuery { get; set; } = new Query();
+    public bool OpenAddBatchComponent { get; set; }
+    public bool isDialogOpen = false;
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        List<string> includesList = new List<string> { typeof(Member).Name, typeof(Category).Name };
+        string includesListAsString = string.Join(",", includesList);
+
+        GridQuery.AddParams(ParamsEnum.IncludesListSeparatedByComa.ToString(), includesListAsString);
+        DropDownMemberQuery.AddParams(ParamsEnum.ControllerType.ToString(), ControllerTypeEnum.dropdown.ToString());
+        DropDownCategoryQuery.AddParams(ParamsEnum.ControllerType.ToString(), ControllerTypeEnum.dropdown.ToString());
+    }
+
+    public async Task CloseDialog()
+    {
+        isDialogOpen = false;
+    }
+
+    public void OpenDialog()
+    {
+        isDialogOpen = true;
+        StateHasChanged();
+    }
+
+}

@@ -15,7 +15,10 @@ namespace FinanceMyLife.Pages.Shared.GenericComponents
         [Parameter]
         public RenderFragment GridColumnsTemplate { get; set; }
         [Parameter]
+        public RenderFragment GridAggregatesTemplate { get; set; }
+        [Parameter]
         public string PKName { get; set; }
+        public List<string> ToolbarList { get; set; } = new List<string>() { "Add", "Edit", "Delete", "ColumnChooser" };
     }
 
 }

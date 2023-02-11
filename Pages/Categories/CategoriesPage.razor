@@ -1,0 +1,36 @@
+﻿@page "/Categories"
+<h3>Categories</h3>
+
+<CRUDGridComponent GridQuery="GridQuery" DTO="Category" PKName="Id">
+    <GridColumnsTemplate>
+        <GridColumn Field="@nameof(Category.Name)" HeaderText="Name" Width="100"></GridColumn>
+        <GridColumn HeaderText="Type" Width="100">
+            <Template>
+                @{
+                    var c = context as Category;
+                    <span>@(c.Type.ToString())</span>
+                }
+            </Template>
+            <EditTemplate>
+                @{
+                    var c = context as Category;
+                    <SfDropDownList TValue="TransactionTypeEnum" TItem="string" DataSource="@TransactionTypes" @bind-Value="@c.Type" />
+                }
+            </EditTemplate>
+        </GridColumn>
+    </GridColumnsTemplate>
+</CRUDGridComponent>
+
+
+@code {
+    public Query GridQuery { get; set; } = new Query();
+    public IEnumerable<string> TransactionTypes = Enum.GetNames(typeof(TransactionTypeEnum));
+
+    protected override async Task OnParametersSetAsync()
+    {
+        @*GridQuery.Where("IdentifierParentName", @operator: "equal", null);*@
+    }
+
+
+}
+

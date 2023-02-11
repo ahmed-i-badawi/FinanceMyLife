@@ -1,0 +1,154 @@
+﻿@inject ICustomCRUDData<TransactionFModel> _iCustomCRUDData
+
+<EditForm Model="FModel" OnValidSubmit="OnDialogSave">
+
+    <div class="row flex-wrap inner-content">
+        <div class="form-group col-lg-8 col-md-8 col-sm-12 col-xs-12 mb-3">
+            <label asp-for="Description" class="control-label">Description</label>
+            <div>
+                <InputText @bind-Value="@FModel.Description" class="form-control"></InputText>
+                <ValidationMessage For="() => FModel.Description"></ValidationMessage>
+            </div>
+        </div>
+        <div class="form-group col-lg-4 col-md-4 col-sm-12 col-xs-12 mb-3">
+            <label asp-for="Category" class="control-label">Category</label>
+            <div>
+                <SfDropDownList AllowFiltering=true Query="DropDownCategoryQuery" TValue="int?" TItem="Category" @bind-Value="FModel.CategoryId" Width="300px">
+                    <DropDownListEvents ValueChange="OnChangeCategory" TValue="int?" TItem="Category"></DropDownListEvents>
+                    <SfDataManager AdaptorInstance="typeof(CustomDataAdaptor<Category>)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
+                    <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                </SfDropDownList>
+                <ValidationMessage For="() => FModel.CategoryId"></ValidationMessage>
+            </div>
+        </div>
+        <div class="form-group col-lg-4 col-md-4 col-sm-12 col-xs-12 mb-3">
+            <label asp-for="Amount" class="control-label">Amount</label>
+            <div>
+                <InputNumber TValue="double" min="1" @bind-Value="@FModel.Amount" class="form-control"></InputNumber>
+                <ValidationMessage For="() => FModel.Amount"></ValidationMessage>
+            </div>
+        </div>
+        <div class="form-group col-lg-4 col-md-4 col-sm-12 col-xs-12 mb-3">
+            <label asp-for="Member" class="control-label">Member</label>
+            <div>
+                <SfDropDownList @ref="@DropDownMember" AllowFiltering=true Query="DropDownMemberQuery" TValue="int?" TItem="Member" @bind-Value="FModel.MemberId" Width="300px">
+                    <DropDownListEvents ValueChange="OnChangeMember" TValue="int?" TItem="Member"></DropDownListEvents>
+                    <SfDataManager AdaptorInstance="typeof(CustomDataAdaptor<Member>)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
+                    <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                </SfDropDownList>
+                <ValidationMessage For="() => FModel.MemberId"></ValidationMessage>
+            </div>
+        </div>
+        <div class="form-group col-lg-4 col-md-4 col-sm-12 col-xs-12 mb-3">
+            <label asp-for="IsOrdered" class="control-label">Is Ordered</label>
+            <div>
+                <SfSwitch @bind-Checked="FModel.IsOrdered" OnLabel="Yes" OffLabel="No"></SfSwitch>
+                <ValidationMessage For="() => FModel.IsOrdered"></ValidationMessage>
+            </div>
+        </div>
+        <div class="form-group col-lg-4 col-md-4 col-sm-12 col-xs-12 mb-3">
+            <label asp-for="StartDate" class="control-label">Start Date</label>
+            <div>
+                <InputDate TValue="DateTime" ValueChanged="OnChangeStartDate" Value="@FModel.StartDate" ValueExpression="() => FModel.StartDate" class="form-control" />
+                <ValidationMessage For="() => FModel.StartDate"></ValidationMessage>
+            </div>
+        </div>
+        <div class="form-group col-lg-2 col-md-2 col-sm-12 col-xs-12 mb-3">
+            <label asp-for="NoOfTimes" class="control-label">No Of Times</label>
+            <div>
+                <InputNumber TValue="int" min="1" ValueChanged="OnChangeNoOfTimes" Value="@FModel.NoOfTimes" ValueExpression="() => FModel.NoOfTimes" class="form-control" />
+                <ValidationMessage For="() => FModel.NoOfTimes"></ValidationMessage>
+            </div>
+        </div>
+        <div class="form-group col-lg-2 col-md-2 col-sm-12 col-xs-12 mb-3">
+            <label asp-for="PeriodType" class="control-label">Period Type</label>
+            <div>
+                <SfDropDownList TValue="PeriodsTypesEnum" TItem="string" DataSource="@PeriodsTypes" @bind-Value="@FModel.PeriodType">
+                    <DropDownListEvents ValueChange="OnChangePeriodType" TValue="PeriodsTypesEnum" TItem="string"></DropDownListEvents>
+                </SfDropDownList>
+                <ValidationMessage For="() => FModel.PeriodType"></ValidationMessage>
+            </div>
+        </div>
+        <div class="form-group col-lg-4 col-md-4 col-sm-12 col-xs-12 mb-3">
+            <label asp-for="EndDate" class="control-label">Last Date</label>
+            <div>
+                <label asp-for="EndDate" class="control-label">@FModel.EndDate</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group mt-4 pt-4 ">
+        <button class="e-btn e-primary" type="submit">Save</button>
+        <button class="e-btn" @onclick="CancelClicked">Cancel</button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public EventCallback Close { get; set; }
+    public TransactionFModel FModel { get; set; } = new TransactionFModel();
+    public Query DropDownCategoryQuery { get; set; } = new Query();
+    public Query DropDownMemberQuery { get; set; } = new Query();
+    public IEnumerable<string> PeriodsTypes = Enum.GetNames(typeof(PeriodsTypesEnum));
+    SfDropDownList<int?, Member> DropDownMember { get; set; }
+
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        DropDownMemberQuery.AddParams(ParamsEnum.ControllerType.ToString(), ControllerTypeEnum.dropdown.ToString());
+        DropDownCategoryQuery.AddParams(ParamsEnum.ControllerType.ToString(), ControllerTypeEnum.dropdown.ToString());
+        FModel.EndDate = DateExtensions.CalculateEndDate(FModel.StartDate, FModel.PeriodType, FModel.NoOfTimes);
+
+    }
+
+    public async Task OnChangeStartDate(DateTime value)
+    {
+        FModel.StartDate = value;
+        FModel.EndDate = DateExtensions.CalculateEndDate(FModel.StartDate, FModel.PeriodType, FModel.NoOfTimes);
+    }
+
+    public async Task OnChangePeriodType(Syncfusion.Blazor.DropDowns.ChangeEventArgs<PeriodsTypesEnum, string> args)
+    {
+        FModel.EndDate = DateExtensions.CalculateEndDate(FModel.StartDate, FModel.PeriodType, FModel.NoOfTimes);
+    }
+
+    public async Task OnChangeMember(Syncfusion.Blazor.DropDowns.ChangeEventArgs<int?, Member> args)
+    {
+        FModel.Member = new Member()
+            {
+                Id = args.ItemData.Id,
+                Name = args.ItemData.Name,
+                IsRefundable = args.ItemData.IsRefundable
+            };
+    }
+
+    public async Task OnChangeCategory(Syncfusion.Blazor.DropDowns.ChangeEventArgs<int?, Category> args)
+    {
+        FModel.Category = new Category()
+            {
+                Id = args.ItemData.Id,
+                Name = args.ItemData.Name,
+                Type = args.ItemData.Type
+            };
+    }
+
+    public async Task OnChangeNoOfTimes(int value)
+    {
+        FModel.NoOfTimes = value;
+        FModel.EndDate = DateExtensions.CalculateEndDate(FModel.StartDate, FModel.PeriodType, FModel.NoOfTimes);
+    }
+
+
+
+    public async Task CancelClicked()
+    {
+        await Close.InvokeAsync();
+    }
+
+    public async Task OnDialogSave()
+    {
+        await _iCustomCRUDData.AddBatchTransactions(FModel);
+        await Close.InvokeAsync();
+    }
+}

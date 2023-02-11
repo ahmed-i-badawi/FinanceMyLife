@@ -1,0 +1,17 @@
+﻿@page "/Members"
+<h3>Members</h3>
+
+<CRUDGridComponent GridQuery="GridQuery" DTO="Member" PKName="Id">
+    <GridColumnsTemplate>
+        <GridColumn Field="@nameof(Member.Name)" HeaderText="Name" Width="100"></GridColumn>
+        <GridColumn Field="@nameof(Member.IsRefundable)" HeaderText="Is Refundable" Width="100"></GridColumn>
+    </GridColumnsTemplate>
+</CRUDGridComponent>
+
+@code {
+    public Query GridQuery { get; set; } = new Query();
+    protected override async Task OnParametersSetAsync()
+    {
+        @*GridQuery.Where("IdentifierParentName", @operator: "equal", null);*@
+    }
+}

@@ -1,0 +1,80 @@
+﻿@inject ICustomCRUDData<TransactionFModel> _iCustomCRUDData
+
+
+<CRUDGridComponent GridQuery="GridQuery" DTO="Transaction" PKName="Id">
+    <GridAggregatesTemplate>
+        <GridAggregates>
+            <GridAggregates>
+                <GridAggregate>
+                    <GridAggregateColumns>
+                        <GridAggregateColumn Field=@nameof(Transaction.Amount) Type="AggregateType.Sum" Format="C2">
+                            <FooterTemplate>
+                                @{
+                                    var aggregate = (context as AggregateTemplateContext);
+                                    <div>
+                                        <p>Sum: @aggregate.Sum</p>
+                                    </div>
+                                }
+                            </FooterTemplate>
+                        </GridAggregateColumn>
+                    </GridAggregateColumns>
+                </GridAggregate>
+                <GridAggregate>
+                    <GridAggregateColumns>
+                        <GridAggregateColumn Field=@nameof(Transaction.Amount) Type="AggregateType.Custom" Format="C2">
+                           
+                        </GridAggregateColumn>
+                    </GridAggregateColumns>
+                </GridAggregate>
+            </GridAggregates>
+        </GridAggregates>
+    </GridAggregatesTemplate>
+    <GridColumnsTemplate>
+        <GridColumn Field="@nameof(Transaction.Description)" HeaderText="Description" Width="100"></GridColumn>
+        <GridColumn Field="@nameof(Transaction.Amount)" HeaderText="Amount" Width="100"></GridColumn>
+        <GridColumn Field="@nameof(Transaction.CategoryId)" HeaderText="Category" Width="100">
+            <Template>
+                @{
+                    var c = context as Transaction;
+                    <span>@c.Category?.Name</span>
+                }
+            </Template>
+        </GridColumn>
+        <GridColumn HeaderText="Member" Width="100">
+            <Template>
+                @{
+                    var c = context as Transaction;
+                    <span>@c.Member?.Name</span>
+                }
+            </Template>
+        </GridColumn>
+        <GridColumn Field="@nameof(Transaction.Date)" HeaderText="Date" Width="100"></GridColumn>
+        <GridColumn Field="@nameof(Transaction.Number)" HeaderText="Number" Width="100"></GridColumn>
+        <GridColumn HeaderText="Type" Width="100">
+            <Template>
+                @{
+                    var c = context as Transaction;
+                    <span>@(c.Category?.Type.ToString() ?? "")</span>
+                }
+            </Template>
+        </GridColumn>
+    </GridColumnsTemplate>
+</CRUDGridComponent>
+
+
+
+@code {
+
+    public Query GridQuery { get; set; } = new Query();
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        List<string> includesList = new List<string> { typeof(Member).Name, typeof(Category).Name };
+        string includesListAsString = string.Join(",", includesList);
+
+        GridQuery.AddParams(ParamsEnum.IncludesListSeparatedByComa.ToString(), includesListAsString);
+    }
+
+
+}

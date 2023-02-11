@@ -18,8 +18,10 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddScoped<ApplicationDbContext>();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
 builder.Services.AddScoped(typeof(IDataAccessLayer<>), typeof(DataAccessLayer<>));
+builder.Services.AddScoped(typeof(ICustomCRUDData<>), typeof(CustomCRUDData<>));
 builder.Services.AddScoped(typeof(CustomDataAdaptor<>));
 
 builder.Services.AddSyncfusionBlazor();

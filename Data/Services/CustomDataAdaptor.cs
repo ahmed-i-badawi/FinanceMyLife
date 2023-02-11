@@ -1,4 +1,5 @@
-﻿using FinanceMyLife.Data.Interfaces;
+﻿using FinanceMyLife.Data.Enums;
+using FinanceMyLife.Data.Interfaces;
 using Syncfusion.Blazor;
 using Syncfusion.Blazor.Data;
 
@@ -18,8 +19,21 @@ public class CustomDataAdaptor<T> : DataAdaptor where T : class
         var query = dataManagerRequest.Params;
 
         IEnumerable<T> result = await _dataAccessLayer.GetAsync(dataManagerRequest);
-        int count = await _dataAccessLayer.GetCountAsync();
-        return dataManagerRequest.RequiresCounts ? new DataResult() { Result = result, Count = count } : count;
+
+
+        object controllerTypeVal = string.Empty;
+        bool hasControllerTypeKey = dataManagerRequest.Params?.TryGetValue(ParamsEnum.ControllerType.ToString(), out controllerTypeVal) ?? false;
+
+        if (hasControllerTypeKey && controllerTypeVal?.ToString() == ControllerTypeEnum.dropdown.ToString())
+        {
+            return result;
+        }
+        else
+        {
+            int count = await _dataAccessLayer.GetCountAsync();
+            return dataManagerRequest.RequiresCounts ? new DataResult() { Result = result, Count = count } : count;
+        }
+
     }
 
     public override async Task<object> InsertAsync(DataManager dataManager, object data, string key)
@@ -47,8 +61,9 @@ public class CustomDataAdaptor<T> : DataAdaptor where T : class
         return primaryKeyValue;
     }
 
-    //public override async Task<object> BatchUpdateAsync(DataManager dataManager, object changedRecords, object addedRecords, object deletedRecords, string keyField, string key, int? dropIndex)
-    //{
-    //	return Task.FromResult<object>(null);
-    //}
+    public override async Task<object> BatchUpdateAsync(DataManager dataManager, object changedRecords, object addedRecords, object deletedRecords, string keyField, string key, int? dropIndex)
+    {
+        return Task.FromResult<object>(null);
+    }
+
 }
